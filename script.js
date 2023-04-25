@@ -16,7 +16,10 @@ window.addEventListener('load', function(){
             this.collisionY = this.game.height * 0.5;
             this.collisionRadius = 50;
             this.speedX = 0; //Dar veloccidad al gamer de manera vertical y horizontal.
-            this.speedY = 0; 
+            this.speedY = 0;
+            this.dx = 0; //create class properties
+            this.dy = 0; //interponer distancia entre el mouse y el player.
+            this.speedModifier = 20;
         }
         draw(context){
             context.beginPath();
@@ -30,11 +33,21 @@ window.addEventListener('load', function(){
             context.moveTo(this.collisionX, this.collisionY);
             context.lineTo(this.game.mouse.x, this.game.mouse.y);
             context.stroke();
+            
         }
         update(){//making the player movie, se crea metodo personalizado
-            this.speedX = 1 // Calcular veloccidad
-            this.collisionX += this.speedX;
-            this.collisionY += this.speedY;
+            this.dx = this.game.mouse.x - this.collisionX;
+            this.dy = this.game.mouse.y - this.collisionY;
+            const distance =  Math.hypot(this.dy, this.dx);
+            if (distance > this.speedModifier) {
+                this.speedX = this.dx/distance || 0; // Calcular veloccidad
+                this.speedY = this.dy/distance || 0;
+            } else {
+                this.speedX = 0;
+                this.speedY = 0;
+            }
+            this.collisionX += this.speedX * this.speedModifier;
+            this.collisionY += this.speedY * this.speedModifier;
 
 
         }
@@ -64,8 +77,10 @@ window.addEventListener('load', function(){
                 this.mouse.pressed = false;
             });
             canvas.addEventListener('mousemove', e => {
-                this.mouse.x = e.offsetX;
-                this.mouse.y = e.offsetY;
+                if(this.mouse.pressed){
+                    this.mouse.x = e.offsetX;
+                    this.mouse.y = e.offsetY;
+                }
             });
         }
         render(context){//este metodo dibujara y actualizara todos los objects en el juego.
@@ -85,4 +100,12 @@ window.addEventListener('load', function(){
     }
     animate();
 });
+
+/** forma larga
+this.speedX = (this.game.mouse.x - this.collisionX)/20; // Calcular veloccidad
+this.speedY = (this.game.mouse.y - this.collisionY)/20;
+this.collisionX += this.speedX;
+this.collisionY += this.speedY;
+*/
+
 
