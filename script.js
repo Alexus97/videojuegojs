@@ -52,6 +52,24 @@ window.addEventListener('load', function(){
 
         }
     }
+    //creating obstacles
+    class Obstacle {
+        constructor(game) {
+            this.game = game;
+            this.collisionX = Math.random() * this.game.width;
+            this.collisionY = Math.random() * this.game.height;
+            this.collisionRadius = 60;
+        }
+        draw(context) {//Metodo de dibujo
+            context.beginPath();
+            context.arc(this.collisionX, this.collisionY, this.collisionRadius, 0, Math.PI * 2);
+            context.save();
+            context.globalAlpha = 0.5;// generated opaciti
+            context.fill();
+            context.restore();
+            context.stroke();
+        }
+    }
 
     class Game {//administrador
         constructor(canvas){
@@ -59,6 +77,8 @@ window.addEventListener('load', function(){
             this.width = this.canvas.width;
             this.height = this.canvas.height;
             this.player = new Player(this);
+            this.numberOfObstacles = 5;
+            this.obstacles = []; //matriz vacia.
             this.mouse = {
                 x: this.width * 0.5,
                 y: this.height * 0.5,
@@ -86,11 +106,19 @@ window.addEventListener('load', function(){
         render(context){//este metodo dibujara y actualizara todos los objects en el juego.
             this.player.draw(context);
             this.player.update();//se llama desde adentro para renderizar   hacia abajo es decir de arriba a baj
+            this.obstacles.forEach(obstacle => obstacle.draw(context));
+        }
+        init(){//Metodo personalizado.
+            for(let i = 0; i < this.numberOfObstacles; i++){
+                this.obstacles.push(new Obstacle(this));
+            }
         }
 
     }
 
     const game = new Game(canvas);
+    game.init();
+    console.log(game)
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);//limpiamos el lienzo.
