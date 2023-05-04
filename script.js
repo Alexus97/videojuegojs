@@ -33,7 +33,6 @@ window.addEventListener('load', function(){
             context.moveTo(this.collisionX, this.collisionY);
             context.lineTo(this.game.mouse.x, this.game.mouse.y);
             context.stroke();
-            
         }
         update(){//making the player movie, se crea metodo personalizado
             this.dx = this.game.mouse.x - this.collisionX;
@@ -48,8 +47,6 @@ window.addEventListener('load', function(){
             }
             this.collisionX += this.speedX * this.speedModifier;
             this.collisionY += this.speedY * this.speedModifier;
-
-
         }
     }
     //creating obstacles
@@ -58,9 +55,17 @@ window.addEventListener('load', function(){
             this.game = game;
             this.collisionX = Math.random() * this.game.width;
             this.collisionY = Math.random() * this.game.height;
-            this.collisionRadius = 60;
+            this.collisionRadius = 100;
+            this.image = document.getElementById('obstacles');
+            this.spriteWidth = 250;
+            this.spriteHeight = 250;
+            this.width = this.spriteWidth;
+            this.height = this.spriteHeight;
+            this.spriteX = this.collisionX - this.width * 0.5;
+            this.spriteY = this.collisionY - this.height * 0.5 -70;
         }
         draw(context) {//Metodo de dibujo
+            context.drawImage(this.image, 0, 0, this.spriteWidth, this.spriteHeight, this.collisionX, this.collisionY, this.width, this.height);
             context.beginPath();
             context.arc(this.collisionX, this.collisionY, this.collisionRadius, 0, Math.PI * 2);
             context.save();
@@ -77,7 +82,7 @@ window.addEventListener('load', function(){
             this.width = this.canvas.width;
             this.height = this.canvas.height;
             this.player = new Player(this);
-            this.numberOfObstacles = 5;
+            this.numberOfObstacles = 10;
             this.obstacles = []; //matriz vacia.
             this.mouse = {
                 x: this.width * 0.5,
@@ -109,11 +114,27 @@ window.addEventListener('load', function(){
             this.obstacles.forEach(obstacle => obstacle.draw(context));
         }
         init(){//Metodo personalizado.
-            for(let i = 0; i < this.numberOfObstacles; i++){
-                this.obstacles.push(new Obstacle(this));
+            /*for(let i = 0; i < this.numberOfObstacles; i++){
+                this.obstacles.push(new Obstacle(this));*/
+            let attempts = 0;
+            while (this.obstacles.length < this.numberOfObstacles && attempts < 500){
+                    let testObstacle = new Obstacle(this);
+                    let overlap = false;
+                    this.obstacles.forEach(obstacle => {
+                        const dx = testObstacle.collisionX - obstacle.collisionX;
+                        const dy = testObstacle.collisionY - obstacle.collisionY;
+                        const distance = Math.hypot(dy, dx);
+                        const sumOfRadii = testObstacle.collisionRadius + obstacle.collisionRadius;
+                        if (distance < sumOfRadii){
+                            overlap = true;
+                        }
+                    });
+                    if (!overlap) {
+                        this.obstacles.push(testObstacle);
+                    }
+                    attempts++;
             }
         }
-
     }
 
     const game = new Game(canvas);
@@ -123,8 +144,7 @@ window.addEventListener('load', function(){
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);//limpiamos el lienzo.
         game.render(ctx);
-        window.requestAnimationFrame(animate);//creamos un bucle de animacion con el metodo
-
+        requestAnimationFrame(animate);//creamos un bucle de animacion con el metodo
     }
     animate();
 });
